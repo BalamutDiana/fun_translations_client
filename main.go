@@ -13,9 +13,14 @@ func main() {
 		log.Fatal(err)
 	}
 
-	trans, err := funtranslationsClient.GetTranslation()
+	lang := funtranslations.LanguagesList()
+	text := "Can you tell me how to get to the library?"
+
+	trans, err := funtranslationsClient.GetTranslation(lang.Pirate, text)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	fmt.Println(trans.Info())
+
 }
