@@ -2,9 +2,13 @@ package funtranslations
 
 import "fmt"
 
+type ResponseData interface {
+	Info() string
+}
+
 type assetsResponse struct {
-	Success  successData  `json:"success"`
 	Contents ContentsData `json:"contents"`
+	Success  SuccessData  `json:"success"`
 }
 
 type ContentsData struct {
@@ -18,6 +22,23 @@ func (c ContentsData) Info() string {
 		c.Translation, c.Text, c.Translated)
 }
 
-type successData struct {
+func (c assetsResponse) JsonStructure() assetsResponse {
+	return c
+}
+
+type SuccessData struct {
 	Total int `json:"total"`
+}
+
+type assetsError struct {
+	Contents ErrorData `json:"error"`
+}
+
+type ErrorData struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+func (e ErrorData) Info() string {
+	return e.Message
 }
