@@ -2,10 +2,6 @@ package funtranslations
 
 import "fmt"
 
-type ResponseData interface {
-	Info() string
-}
-
 type assetsResponse struct {
 	Contents ContentsData `json:"contents"`
 	Success  SuccessData  `json:"success"`
@@ -17,13 +13,9 @@ type ContentsData struct {
 	Translation string `json:"translation"`
 }
 
-func (c ContentsData) Info() string {
+func (c ContentsData) GetText() string {
 	return fmt.Sprintf("Translation from english to %s\n Source text: %s\n Translation: %s",
 		c.Translation, c.Text, c.Translated)
-}
-
-func (c assetsResponse) JsonStructure() assetsResponse {
-	return c
 }
 
 type SuccessData struct {
@@ -39,6 +31,6 @@ type ErrorData struct {
 	Message string `json:"message"`
 }
 
-func (e ErrorData) Info() string {
+func (e ErrorData) GetText() string {
 	return e.Message
 }
