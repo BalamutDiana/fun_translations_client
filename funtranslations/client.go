@@ -12,12 +12,16 @@ import (
 )
 
 type Languages struct {
-	Pirate string
+	Pirate      string
+	Shakespeare string
+	Yoda        string
 }
 
 func LanguagesList() *Languages {
 	return &Languages{
-		Pirate: "pirate",
+		Pirate:      "pirate",
+		Shakespeare: "shakespeare",
+		Yoda:        "yoda",
 	}
 }
 
@@ -42,58 +46,24 @@ func NewClient(timeout time.Duration) (*Client, error) {
 	}, nil
 }
 
-func (c Client) GetTranslation(language, text string) (ResponseData, error) {
-	values := map[string]string{"text": text}
-	json_data, err := json.Marshal(values)
+func (c Client) GetTranslation(language, text string) (string, error) {
 
+	resp, err := marshalRequest(c, language, text)
 	if err != nil {
-		return ContentsData{}, err
-	}
-
-	url := fmt.Sprintf("https://api.funtranslations.com/translate/%s.json", language)
-	resp, err := c.client.Post(url, "application/json", bytes.NewBuffer(json_data))
-	if err != nil {
-		return ContentsData{}, err
+		return "", err
 	}
 	defer resp.Body.Close()
 
 	available, err := checkAvailability(resp)
 	if err != nil {
-		return ContentsData{}, err
+		return "", err
 	}
 
 	if available {
-		var r assetsResponse
-
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return r.Contents, err
-		}
-
-		err = json.Unmarshal(body, &r)
-		if err != nil {
-			return r.Contents, err
-		}
-
-		return r.Contents, nil
-
+		return unmarshalResponse(resp, assetsResponse{})
 	} else {
-
-		var r assetsError
-
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return r.Contents, err
-		}
-
-		err = json.Unmarshal(body, &r)
-		if err != nil {
-			return r.Contents, err
-		}
-
-		return r.Contents, nil
+		return unmarshalResponse(resp, assetsError{})
 	}
-
 }
 
 func checkAvailability(resp *http.Response) (bool, error) {
@@ -107,4 +77,47 @@ func checkAvailability(resp *http.Response) (bool, error) {
 		return false, errors.New("something went wrong, check the request or try again later")
 	}
 
+}
+
+func unmarshalResponse(resp *http.Response, data interface{}) (string, error) {
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	if d, ok := data.(assetsResponse); ok {
+
+		err = json.Unmarshal(body, &d)
+		if err != nil {
+			return "", err
+		}
+
+		return d.Contents.GetText(), nil
+
+	} else if _, ok := data.(assetsError); ok {
+
+		err = json.Unmarshal(body, &d)
+		if err != nil {
+			return "", err
+		}
+
+		return d.Contents.GetText(), nil
+
+	} else {
+		return "", errors.New("wrong data type")
+	}
+
+}
+
+func marshalRequest(c Client, language, text string) (*http.Response, error) {
+	values := map[string]string{"text": text}
+	json_data, err := json.Marshal(values)
+
+	if err != nil {
+		return nil, err
+	}
+
+	url := fmt.Sprintf("https://api.funtranslations.com/translate/%s.json", language)
+	return c.client.Post(url, "application/json", bytes.NewBuffer(json_data))
 }
