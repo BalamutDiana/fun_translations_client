@@ -17,7 +17,7 @@ type Languages struct {
 	Yoda        string
 }
 
-func LanguagesList() *Languages {
+func GetLanguagesList() *Languages {
 	return &Languages{
 		Pirate:      "pirate",
 		Shakespeare: "shakespeare",
@@ -95,14 +95,14 @@ func unmarshalResponse(resp *http.Response, data interface{}) (string, error) {
 
 		return d.Contents.GetText(), nil
 
-	} else if _, ok := data.(assetsError); ok {
+	} else if e, ok := data.(assetsError); ok {
 
-		err = json.Unmarshal(body, &d)
+		err = json.Unmarshal(body, &e)
 		if err != nil {
 			return "", err
 		}
 
-		return d.Contents.GetText(), nil
+		return e.Contents.GetText(), nil
 
 	} else {
 		return "", errors.New("wrong data type")
