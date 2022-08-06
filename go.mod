@@ -1,3 +1,3 @@
-module module github.com/BalamutDiana/fun_translations_client
+module github.com/BalamutDiana/fun_translations_client
 
 go 1.18
