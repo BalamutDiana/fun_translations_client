@@ -4,7 +4,7 @@ fun_translation_client is a Go client library for accessing the https://api.funt
 
 ## Example:
 
-```
+```golang
 package main
 
 import (
@@ -12,7 +12,7 @@ import (
 	"log"
 	"time"
   
-  "github.com/BalamutDiana/fun_translations_client"
+  	"github.com/BalamutDiana/fun_translations_client"
 )
 
 func main() {
