@@ -30,7 +30,6 @@ type Client struct {
 }
 
 func NewClient(timeout time.Duration) (*Client, error) {
-
 	if timeout == 0 {
 		return nil, errors.New("timeout can't be zero")
 	}
@@ -47,7 +46,6 @@ func NewClient(timeout time.Duration) (*Client, error) {
 }
 
 func (c Client) GetTranslation(language, text string) (string, error) {
-
 	resp, err := marshalRequest(c, language, text)
 	if err != nil {
 		return "", err
@@ -67,7 +65,6 @@ func (c Client) GetTranslation(language, text string) (string, error) {
 }
 
 func checkAvailability(resp *http.Response) (bool, error) {
-
 	switch resp.StatusCode {
 	case 200:
 		return true, nil
@@ -76,34 +73,26 @@ func checkAvailability(resp *http.Response) (bool, error) {
 	default:
 		return false, errors.New("something went wrong, check the request or try again later")
 	}
-
 }
 
 func unmarshalResponse(resp *http.Response, data interface{}) (string, error) {
-
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}
 
 	if d, ok := data.(assetsResponse); ok {
-
 		err = json.Unmarshal(body, &d)
 		if err != nil {
 			return "", err
 		}
-
 		return d.Contents.GetText(), nil
-
 	} else if e, ok := data.(assetsError); ok {
-
 		err = json.Unmarshal(body, &e)
 		if err != nil {
 			return "", err
 		}
-
 		return e.Contents.GetText(), nil
-
 	} else {
 		return "", errors.New("wrong data type")
 	}
@@ -113,7 +102,6 @@ func unmarshalResponse(resp *http.Response, data interface{}) (string, error) {
 func marshalRequest(c Client, language, text string) (*http.Response, error) {
 	values := map[string]string{"text": text}
 	json_data, err := json.Marshal(values)
-
 	if err != nil {
 		return nil, err
 	}
